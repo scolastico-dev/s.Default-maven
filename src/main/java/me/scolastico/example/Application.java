@@ -20,7 +20,7 @@ public class Application {
       ErrorHandler.enableCatchUncaughtException();
       //ErrorHandler.enableSentry("");
       System.out.println(FigletFont.convertOneLine("Application"));
-      System.out.println("Version: " + version + " | By: scolastico");
+      System.out.println("Version: " + version + " | Commit: " + branch + "/" + commit + " | By: scolastico");
       final double startingTime = System.currentTimeMillis();
 
       System.out.print("Loading config... ");
@@ -31,6 +31,7 @@ public class Application {
 
       System.out.println("Done! Starting took " + ((System.currentTimeMillis()-startingTime)/1000) + " seconds.");
     } catch (Exception e) {
+      System.out.println("[FAIL]");
       ErrorHandler.handleFatal(e);
     }
   }
