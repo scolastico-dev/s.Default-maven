@@ -56,12 +56,12 @@ jobs:
       - name: Set branch in BRANCH file
         uses: datamonsters/replace-action@v2
         with:
-          files: src/main/resources/staticVars/BRNACH
+          files: src/main/resources/staticVars/BRANCH
           replacements: IN-DEV=${{ steps.vars.outputs.branch }}
       - name: Set commit hash in COMMIT file
         uses: datamonsters/replace-action@v2
         with:
-          files: src/main/resources/staticVars/BRNACH
+          files: src/main/resources/staticVars/COMMIT
           replacements: IN-DEV=${{ steps.vars.outputs.sha_short }}
       - uses: actions/upload-artifact@v2
         name: Upload prepared repo to artifacts
