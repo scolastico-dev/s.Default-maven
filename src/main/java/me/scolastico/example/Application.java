@@ -2,6 +2,8 @@ package me.scolastico.example;
 
 import com.github.lalyos.jfiglet.FigletFont;
 import me.scolastico.example.dataholders.Config;
+import me.scolastico.example.dataholders.DatabaseConfig;
+import me.scolastico.example.etc.DatabaseConnector;
 import me.scolastico.tools.handler.ConfigHandler;
 import me.scolastico.tools.handler.ErrorHandler;
 import me.scolastico.tools.simplified.SimplifiedResourceFileReader;
@@ -27,6 +29,20 @@ public class Application {
       configHandler = new ConfigHandler<>(new Config(), "config.json");
       if (!configHandler.checkIfExists()) configHandler.saveDefaultConfig();
       config = configHandler.loadConfig();
+      System.out.println("[OK]");
+
+      System.out.print("Loading database config... ");
+      ConfigHandler<DatabaseConfig> databaseConfigHandler = new ConfigHandler<>(new DatabaseConfig(), "dbConfig.json");
+      if (!databaseConfigHandler.checkIfExists()) databaseConfigHandler.saveDefaultConfig();
+      DatabaseConfig dbConfig = databaseConfigHandler.loadConfig();
+      System.out.println("[OK]");
+
+      System.out.print("Connecting to database... ");
+      DatabaseConnector.connectToDatabase(dbConfig);
+      System.out.println("[OK]");
+
+      System.out.print("Migrate database... ");
+      DatabaseConnector.runMigrations();
       System.out.println("[OK]");
 
       System.out.println("Done! Starting took " + ((System.currentTimeMillis()-startingTime)/1000) + " seconds.");
