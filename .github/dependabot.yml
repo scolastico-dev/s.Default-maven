@@ -6,3 +6,4 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "h2"
+      - dependency-name: "com.h2database:h2"
