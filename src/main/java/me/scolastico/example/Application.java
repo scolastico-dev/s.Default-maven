@@ -1,11 +1,17 @@
 package me.scolastico.example;
 
-import com.github.lalyos.jfiglet.FigletFont;
+import java.util.ArrayList;
 import me.scolastico.example.dataholders.Config;
-import me.scolastico.example.dataholders.DatabaseConfig;
-import me.scolastico.example.etc.DatabaseConnector;
+import me.scolastico.example.routines.starting.ConfigRoutine;
+import me.scolastico.example.routines.starting.DatabaseRoutine;
+import me.scolastico.example.routines.starting.ErrorRoutine;
+import me.scolastico.example.routines.starting.FinishRoutine;
+import me.scolastico.example.routines.starting.HeaderRoutine;
+import me.scolastico.tools.console.ConsoleLoadingAnimation;
 import me.scolastico.tools.handler.ConfigHandler;
 import me.scolastico.tools.handler.ErrorHandler;
+import me.scolastico.tools.routine.Routine;
+import me.scolastico.tools.routine.RoutineManager;
 import me.scolastico.tools.simplified.SimplifiedResourceFileReader;
 
 public class Application {
@@ -18,36 +24,18 @@ public class Application {
 
   public static void main(String[] args) {
     try {
-      ErrorHandler.enableErrorLogFile();
-      ErrorHandler.enableCatchUncaughtException();
-      //ErrorHandler.enableSentry("");
-      System.out.println(FigletFont.convertOneLine("Application"));
-      System.out.println("Version: " + version + " | Commit: " + branch + "/" + commit + " | By: scolastico");
-      final double startingTime = System.currentTimeMillis();
-
-      System.out.print("Loading config... ");
-      configHandler = new ConfigHandler<>(new Config(), "config.json");
-      if (!configHandler.checkIfExists()) configHandler.saveDefaultConfig();
-      config = configHandler.loadConfig();
-      System.out.println("[OK]");
-
-      System.out.print("Loading database config... ");
-      ConfigHandler<DatabaseConfig> databaseConfigHandler = new ConfigHandler<>(new DatabaseConfig(), "dbConfig.json");
-      if (!databaseConfigHandler.checkIfExists()) databaseConfigHandler.saveDefaultConfig();
-      DatabaseConfig dbConfig = databaseConfigHandler.loadConfig();
-      System.out.println("[OK]");
-
-      System.out.print("Connecting to database... ");
-      DatabaseConnector.connectToDatabase(dbConfig);
-      System.out.println("[OK]");
-
-      System.out.print("Migrate database... ");
-      DatabaseConnector.runMigrations();
-      System.out.println("[OK]");
-
-      System.out.println("Done! Starting took " + ((System.currentTimeMillis()-startingTime)/1000) + " seconds.");
+      ArrayList<Routine> routines = new ArrayList<>();
+      routines.add(new ErrorRoutine());
+      routines.add(new HeaderRoutine());
+      routines.add(new ConfigRoutine());
+      routines.add(new DatabaseRoutine());
+      routines.add(new FinishRoutine());
+      RoutineManager manager = new RoutineManager(routines);
+      manager.startNotAsynchronously();
     } catch (Exception e) {
-      System.out.println("[FAIL]");
+      try {
+        ConsoleLoadingAnimation.disable();
+      } catch (Exception ignored) {}
       ErrorHandler.handleFatal(e);
     }
   }
