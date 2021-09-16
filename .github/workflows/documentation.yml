@@ -28,3 +28,22 @@ jobs:
           name: build
           path: build
           retention-days: 1
+# Continuous Integration; Needs secrets to work properly.
+# These secrets need to be set: SSH_HOST, SSH_PORT,
+# SSH_USER and DOCUMENTATION_REMOTE_HOST_PATH
+#  ci:
+#    name: Continuous Integration
+#    runs-on: ubuntu-20.04
+#    needs: build
+#    steps:
+#      - uses: actions/download-artifact@v2
+#        name: Download builded documentation
+#        with:
+#          name: prepared-repo
+#      - name: Install SSH Key
+#        uses: shimataro/ssh-key-action@v2
+#        with:
+#          key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          known_hosts: '' # To get the hash use: ssh-keyscan -H IP_ADDRESS_OF_HOST
+#      - name: Deploy with rsync
+#        run: rsync -avz -e 'ssh -p ${{ secrets.SSH_PORT }}' ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DOCUMENTATION_REMOTE_HOST_PATH }}
