@@ -1,9 +1,9 @@
 package me.scolastico.example.routines.starting;
 
 import java.util.HashMap;
-import me.scolastico.example.dataholders.DatabaseConfig;
-import me.scolastico.example.etc.DatabaseConnector;
 import me.scolastico.tools.console.ConsoleLoadingAnimation;
+import me.scolastico.tools.ebean.DatabaseConfig;
+import me.scolastico.tools.ebean.DatabaseConnector;
 import me.scolastico.tools.handler.ErrorHandler;
 import me.scolastico.tools.routine.Routine;
 import me.scolastico.tools.routine.RoutineAnswer;
@@ -15,16 +15,23 @@ public class DatabaseRoutine implements Routine {
   public RoutineAnswer execute(HashMap<String, Object> hashMap) throws Exception {
     try {
       DatabaseConfig config = (DatabaseConfig) hashMap.get("dbConfig");
+      DatabaseConnector connector = new DatabaseConnector(true);
+
+      System.out.print("Loading database drivers... ");
+      ConsoleLoadingAnimation.enable();
+      DatabaseConnector.loadDatabaseDrivers();
+      ConsoleLoadingAnimation.disable();
+      System.out.println(Ansi.ansi().fgGreen().a("[OK]").reset());
 
       System.out.print("Connecting to database... ");
       ConsoleLoadingAnimation.enable();
-      DatabaseConnector.connectToDatabase(config);
+      connector.connectToDatabase(config);
       ConsoleLoadingAnimation.disable();
       System.out.println(Ansi.ansi().fgGreen().a("[OK]").reset());
 
       System.out.print("Migrate database... ");
       ConsoleLoadingAnimation.enable();
-      DatabaseConnector.runMigrations();
+      connector.runMigrations();
       ConsoleLoadingAnimation.disable();
       System.out.println(Ansi.ansi().fgGreen().a("[OK]").reset());
 

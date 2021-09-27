@@ -119,6 +119,7 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,maven
 
+adminPanelSettings.json
 dbConfig.json
 config.json
 error.*
