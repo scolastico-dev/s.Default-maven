@@ -163,7 +163,7 @@ jobs:
   javadoc:
     name: Generate Javadoc
     runs-on: ubuntu-20.04
-    if: ${{ env.GENERATE_JAVADOC == 'true' }}
+    if: env.GENERATE_JAVADOC == 'true'
     needs: test
     steps:
       - uses: actions/download-artifact@v2
@@ -201,7 +201,7 @@ jobs:
         with:
           name: build
       - uses: actions/download-artifact@v2
-        if: ${{ env.GENERATE_JAVADOC == 'true' }} && ${{ env.CI_JAVADOC == 'true' }}
+        if: env.GENERATE_JAVADOC == 'true' && env.CI_JAVADOC == 'true'
         name: Download javadocs
         with:
           name: javadocs
@@ -213,7 +213,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: peaceiris/actions-gh-pages@v3
-        if: ${{ env.GENERATE_JAVADOC }} && ${{ env.CI_JAVADOC }}
+        if: env.GENERATE_JAVADOC == 'true' && env.CI_JAVADOC == 'true'
         name: Update live javadocs
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -254,7 +254,7 @@ jobs:
           path: build
           retention-days: 1
   ci-docs:
-    if: ${{ env.CI_DOCS == 'true' }}
+    if: env.CI_DOCS == 'true' && github.event_name != 'schedule'
     name: Continuous integration of documentation
     runs-on: ubuntu-20.04
     needs: build-docs
