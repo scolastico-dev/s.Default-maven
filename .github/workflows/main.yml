@@ -163,28 +163,32 @@ jobs:
   javadoc:
     name: Generate Javadoc
     runs-on: ubuntu-20.04
-    if: env.GENERATE_JAVADOC == 'true'
     needs: test
     steps:
       - uses: actions/download-artifact@v2
+        if: ${{ env.GENERATE_JAVADOC }}
         name: Download prepared repository
         with:
           name: prepared-repo
       - name: Cache dependencies
+        if: ${{ env.GENERATE_JAVADOC }}
         uses: actions/cache@v2
         id: cache
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Set up JDK 12
+        if: ${{ env.GENERATE_JAVADOC }}
         uses: actions/setup-java@v1
         with:
           java-version: 12
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Generate javadocs with Mmven
+        if: ${{ env.GENERATE_JAVADOC }}
         run: mvn -B javadoc:javadoc --file pom.xml
       - uses: actions/upload-artifact@v2
+        if: ${{ env.GENERATE_JAVADOC }}
         name: Upload javadocs to artifacts
         with:
           name: javadocs
@@ -201,7 +205,7 @@ jobs:
         with:
           name: build
       - uses: actions/download-artifact@v2
-        if: env.GENERATE_JAVADOC == 'true' && env.CI_JAVADOC == 'true'
+        if: ${{ env.GENERATE_JAVADOC }} && ${{ env.CI_JAVADOC }}
         name: Download javadocs
         with:
           name: javadocs
@@ -213,7 +217,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: peaceiris/actions-gh-pages@v3
-        if: env.GENERATE_JAVADOC == 'true' && env.CI_JAVADOC == 'true'
+        if: ${{ env.GENERATE_JAVADOC }} && ${{ env.CI_JAVADOC }}
         name: Update live javadocs
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -254,21 +258,24 @@ jobs:
           path: build
           retention-days: 1
   ci-docs:
-    if: env.CI_DOCS == 'true' && github.event_name != 'schedule'
+    if: github.event_name != 'schedule'
     name: Continuous integration of documentation
     runs-on: ubuntu-20.04
     needs: build-docs
     steps:
       - uses: actions/download-artifact@v2
+        if: ${{ env.CI_DOCS }}
         name: Download builded documentation
         with:
           name: build
       - name: Install SSH Key
+        if: ${{ env.CI_DOCS }}
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOST }}
       - name: Deploy with rsync
+        if: ${{ env.CI_DOCS }}
         run: rsync -avz -e 'ssh -p ${{ secrets.SSH_PORT }}' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DOCUMENTATION_REMOTE_HOST_PATH }}
   analyze:
     name: CodeQL Analyze
