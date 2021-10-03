@@ -82,6 +82,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: mvn -B dependency:resolve --file pom.xml
       - name: Cache dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache@v2
         with:
           path: ~/.m2/repository
