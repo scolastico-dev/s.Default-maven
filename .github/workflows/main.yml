@@ -40,7 +40,7 @@ jobs:
         if: github.event_name == 'release'
         name: Get latest version name from GitHub
         with:
-          repository: ${{ env.USERNAME }}/${{ REPO }}
+          repository: ${{ env.USERNAME }}/${{ env.REPO }}
           excludes: draft
       - name: Declare some variables
         id: vars
