@@ -8,7 +8,7 @@
 ## *<This segment should be deleted before publishing!>*
 Your ToDo's:
 - Edit group and artifact id in pom.xml 
-- Edit main.yml workflow in .github folder (DON'T FORGET TO REPLACE PROJECT NAME!)
+- Edit main.yml workflow in .github folder
 
 ## License
 This project is licensed under the **Mozilla Public License Version 2.0**. Read more [here](https://www.mozilla.org/en-US/MPL/2.0/).
