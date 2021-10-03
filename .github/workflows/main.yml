@@ -254,7 +254,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         name: Upload builded files to artifacts
         with:
-          name: build
+          name: builded-docs
           path: build
           retention-days: 1
   ci-docs:
@@ -267,7 +267,7 @@ jobs:
         if: ${{ env.CI_DOCS == 'true' }}
         name: Download builded documentation
         with:
-          name: build
+          name: builded-docs
       - name: Install SSH Key
         if: ${{ env.CI_DOCS == 'true' }}
         uses: shimataro/ssh-key-action@v2
