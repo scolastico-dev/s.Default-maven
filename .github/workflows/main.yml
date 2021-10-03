@@ -29,7 +29,6 @@ env:
 
 jobs:
   prepare:
-    if: github.event_name != 'schedule'
     name: Prepare Workflow
     runs-on: ubuntu-20.04
     steps:
@@ -109,6 +108,7 @@ jobs:
           name: prepared-repo
           path: ${{ github.workspace }}
   test:
+    if: github.event_name != 'schedule'
     name: Test
     runs-on: ubuntu-20.04
     needs: prepare
