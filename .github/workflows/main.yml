@@ -23,6 +23,7 @@ env:
   GENERATE_JAVADOC: false
   CI_JAVADOC: false
   CI_DOCS: false
+  CODE_QL_ANALYZE: false
   USERNAME: scolastico-dev
   REPO: s.Default
   JAR_NAME: example-jar-with-dependencies.jar
@@ -30,7 +31,7 @@ env:
 jobs:
   prepare:
     name: Prepare Workflow
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     steps:
       - uses: actions/checkout@v2
         name: Download repo from GitHub
@@ -81,27 +82,25 @@ jobs:
         with:
           files: src/main/resources/staticVars/COMMIT
           replacements: IN-DEV=${{ steps.vars.outputs.sha_short }}
-      - name: Set up JDK 12
-        uses: actions/setup-java@v1
-        with:
-          java-version: 12
-          server-id: github
-          settings-path: ${{ github.workspace }}
       - name: Cache dependencies
         uses: actions/cache@v2
         id: cache
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - name: Set up JDK 12
+        uses: actions/setup-java@v1
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          java-version: 12
+          server-id: github
+          settings-path: ${{ github.workspace }}
+      - name: Set up Maven
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: stCarolas/setup-maven@v4.2
       - name: Download dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: mvn -B dependency:resolve --file pom.xml
-      - name: Cache dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - uses: actions/upload-artifact@v2
         name: Upload prepared repo to artifacts
         with:
@@ -110,7 +109,7 @@ jobs:
   test:
     if: github.event_name != 'schedule'
     name: Test
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     needs: prepare
     steps:
       - uses: actions/download-artifact@v2
@@ -129,11 +128,13 @@ jobs:
           java-version: 12
           server-id: github
           settings-path: ${{ github.workspace }}
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
       - name: Test with maven
         run: mvn -B test --file pom.xml
   build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     needs: [test, analyze]
     steps:
       - uses: actions/download-artifact@v2
@@ -152,6 +153,8 @@ jobs:
           java-version: 12
           server-id: github
           settings-path: ${{ github.workspace }}
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
       - name: Build with maven
         run: mvn -B clean install compile package
       - uses: actions/upload-artifact@v2
@@ -162,7 +165,7 @@ jobs:
           retention-days: 1
   javadoc:
     name: Generate Javadoc
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     needs: [test, analyze]
     steps:
       - uses: actions/download-artifact@v2
@@ -184,7 +187,9 @@ jobs:
           java-version: 12
           server-id: github
           settings-path: ${{ github.workspace }}
-      - name: Generate javadocs with Mmven
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+      - name: Generate javadocs with Maven
         if: ${{ env.GENERATE_JAVADOC == 'true' }}
         run: mvn -B javadoc:javadoc --file pom.xml
       - uses: actions/upload-artifact@v2
@@ -197,7 +202,7 @@ jobs:
   ci:
     name: Continuous integration
     if: github.event_name == 'release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     needs: [build, javadoc]
     steps:
       - uses: actions/download-artifact@v2
@@ -224,7 +229,7 @@ jobs:
           publish_dir: javadocs/
   cleanup:
     name: Cleanup
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     continue-on-error: true
     if: always()
     needs: [prepare, test, build, javadoc, ci, analyze]
@@ -236,7 +241,7 @@ jobs:
   build-docs:
     if: github.event_name != 'schedule' && github.event_name != 'pull_request'
     name: Generate documentation
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -260,7 +265,7 @@ jobs:
   ci-docs:
     if: github.event_name != 'schedule' && github.event_name != 'pull_request'
     name: Continuous integration of documentation
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu]
     needs: build-docs
     steps:
       - uses: actions/download-artifact@v2
@@ -291,26 +296,32 @@ jobs:
         language: ['java']
     steps:
       - uses: actions/download-artifact@v2
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         name: Download prepared repository
         with:
           name: prepared-repo
       - name: Cache dependencies
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         uses: actions/cache@v2
         id: cache
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Set up JDK 12
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         uses: actions/setup-java@v1
         with:
           java-version: 12
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Initialize CodeQL
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         uses: github/codeql-action/init@v1
         with:
           languages: ${{ matrix.language }}
       - name: Autobuild
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         uses: github/codeql-action/autobuild@v1
       - name: Perform CodeQL Analysis
+        if: ${{env.CODE_QL_ANALYZE == 'true' }}
         uses: github/codeql-action/analyze@v1
