@@ -56,7 +56,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.scolastico.hosting.sHosting</mainClass>
+              <mainClass>me.scolastico.example.Application</mainClass> <!-- REPLACE MAIN CLASS NAME HERE -->
             </manifest>
           </archive>
           <descriptorRefs>
@@ -90,7 +90,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
-              <mainClass>com.scolastico.hosting.sHosting</mainClass>
+              <mainClass>me.scolastico.example.Application</mainClass> <!-- REPLACE MAIN CLASS NAME HERE -->
             </manifest>
           </archive>
         </configuration>
