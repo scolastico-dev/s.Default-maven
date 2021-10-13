@@ -31,7 +31,7 @@ env:
 jobs:
   prepare:
     name: Prepare Workflow
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         name: Download repo from GitHub
@@ -109,7 +109,7 @@ jobs:
   test:
     if: github.event_name != 'schedule'
     name: Test
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     needs: prepare
     steps:
       - uses: actions/download-artifact@v2
@@ -134,7 +134,7 @@ jobs:
         run: mvn -B test --file pom.xml
   build:
     name: Build
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     needs: [test, analyze]
     steps:
       - uses: actions/download-artifact@v2
@@ -165,7 +165,7 @@ jobs:
           retention-days: 1
   javadoc:
     name: Generate Javadoc
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     needs: [test, analyze]
     steps:
       - uses: actions/download-artifact@v2
@@ -202,7 +202,7 @@ jobs:
   ci:
     name: Continuous integration
     if: github.event_name == 'release'
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     needs: [build, javadoc]
     steps:
       - uses: actions/download-artifact@v2
@@ -229,7 +229,7 @@ jobs:
           publish_dir: javadocs/
   cleanup:
     name: Cleanup
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     continue-on-error: true
     if: always()
     needs: [prepare, test, build, javadoc, ci, analyze]
@@ -241,7 +241,7 @@ jobs:
   build-docs:
     if: github.event_name != 'schedule' && github.event_name != 'pull_request'
     name: Generate documentation
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -265,7 +265,7 @@ jobs:
   ci-docs:
     if: github.event_name != 'schedule' && github.event_name != 'pull_request'
     name: Continuous integration of documentation
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-20.04
     needs: build-docs
     steps:
       - uses: actions/download-artifact@v2
@@ -285,7 +285,7 @@ jobs:
   analyze:
     name: CodeQL Analyze
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       actions: read
       contents: read
